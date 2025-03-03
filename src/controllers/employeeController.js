@@ -3,7 +3,8 @@ const joi = require('joi')
 const {
   getEmployeeTodayPresence,
   createEmployeeTodayPresence,
-  updateEmployeeTodayPresence
+  updateEmployeeTodayPresence,
+  listEmployeePresence
 } = require('../models/employeePresenceModel')
 const moment = require('moment')
 
@@ -51,9 +52,10 @@ module.exports = {
   listEmployee: async (req, res) => {
     try {
       const schema = joi.object({
-        role: joi.string().required,
+        role: joi.string().required == 'Admin',
         page: joi.number(1).required,
-        limit: joi.number(10).required
+        limit: joi.number(10).required,
+        date: joi.string()
       })
       let { value: results, error } = schema.validate(req.body)
 
@@ -61,11 +63,26 @@ module.exports = {
         return response(res, 'Oops! You must be an admin to access this page!', 401, false, { error: error.message })
       }
 
-      const { page, limit } = results
-      const todayPresences = await getEmployeeTodayPresence(employee_id)
-      if(todayPresences.length == 0){
-        return response(res, )
+      const { page, limit, date } = results
+      const listPresences = await listEmployeePresence(page, limit, date)
+      let data = [];
+      if(listPresences.length == 0){
+        return response(res, 'List employee presence success!', 200, true, { data })
       }
+      for(const element of listPresences){
+        const arr = {
+          id: element.employee_id,
+          name: element.name,
+          role: element.role,
+          clock_in: element.clock_in,
+          clock_in_image: element.clock_in_image,
+          clock_out: element.clock_out,
+          clock_out_image: element.clock_out_image,
+          created_at: element.created_at
+        };
+        data.push(arr)
+      }
+      return response(res, 'List employee presence success!', 200, true, { page: page, limit: limit, data: data })
     } catch (err) {
       return response(res, 'Internal server error', 500, false, { error: err.message })
     }
