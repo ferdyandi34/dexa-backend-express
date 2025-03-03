@@ -15,6 +15,6 @@ CREATE TABLE `dexa`.`employee_presences` (
   `clock_in` DATETIME NULL,
   `clock_in_image` VARCHAR(45) NULL,
   `clock_out` DATETIME NULL,
-  `clocl_out_image` VARCHAR(45) NULL,
+  `clock_out_image` VARCHAR(45) NULL,
   `created_at` DATETIME NULL,
   PRIMARY KEY (`id`));

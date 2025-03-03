@@ -1,14 +1,17 @@
 const response = require('../helpers/response')
 const joi = require('joi')
 const {
-  createEmployee,
-  getEmployeeByEmail
-} = require('../models/employeeModel')
+  getEmployeeTodayPresence,
+  createEmployeeTodayPresence,
+  updateEmployeeTodayPresence
+} = require('../models/employeePresenceModel')
+const moment = require('moment')
 
 module.exports = {
-    presenceEmployee: async (req, res) => {
+  presenceEmployee: async (req, res) => {
     try {
       const schema = joi.object({
+        employee_id: joi.number().required,
         image: joi.string().required
       })
       let { value: results, error } = schema.validate(req.body)
@@ -17,21 +20,51 @@ module.exports = {
         return response(res, 'Oops! You have to upload image!', 401, false, { error: error.message })
       }
 
-      const { email, password } = results
-      const isExists = await getEmployeeByEmail({ email })
-      if (isExists.length > 0) {
-        return response(res, 'Email already used', 401, false)
-      } else {
-        const salt = await bcrypt.genSalt(10)
-        const hashedPassword = await bcrypt.hash(password, salt)
-        const userCostumer = {
-          name: results.name,
-          username: results.username,
-          email: results.email,
-          password: hashedPassword,
-          role: results.role
+      const { employee_id, image } = results
+      const isExists = await getEmployeeTodayPresence(employee_id)
+      if (isExists.length && isExists.clock_in && isExists.clock_out) {
+        return response(res, `Today's presence already filled`, 401, false)
+      } else if (!isExists.length){ // Clock in
+        const data = {
+          employee_id: employee_id,
+          clock_in: moment().date(),
+          clock_in_image: image,
+          clock_out: null,
+          clock_out_image: null,
+          created_at: moment().date()
         }
-          await createEmployee(userCostumer)
+          await createEmployeeTodayPresence(data)
+          return response(res, 'Clock in success!', 200, true, { data })
+      } else { // Clock out
+        const data = {
+          clock_out: moment().date(),
+          clock_out_image: image,
+        }
+        await updateEmployeeTodayPresence(employee_id, data)
+        return response(res, 'Clock out success!', 200, true, { data })
+      }
+    } catch (err) {
+      return response(res, 'Internal server error', 500, false, { error: err.message })
+    }
+  },
+
+  listEmployee: async (req, res) => {
+    try {
+      const schema = joi.object({
+        role: joi.string().required,
+        page: joi.number(1).required,
+        limit: joi.number(10).required
+      })
+      let { value: results, error } = schema.validate(req.body)
+
+      if (error) {
+        return response(res, 'Oops! You must be an admin to access this page!', 401, false, { error: error.message })
+      }
+
+      const { page, limit } = results
+      const todayPresences = await getEmployeeTodayPresence(employee_id)
+      if(todayPresences.length == 0){
+        return response(res, )
       }
     } catch (err) {
       return response(res, 'Internal server error', 500, false, { error: err.message })

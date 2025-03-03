@@ -37,7 +37,8 @@ module.exports = {
           password: hashedPassword,
           role: results.role
         }
-          await createEmployee(userCostumer)
+          const createEmployee = await createEmployee(userCostumer)
+          return response(res, 'Congratulation! Now you have an account!', 200, true, { id: createEmployee.id })
       }
     } catch (err) {
       return response(res, 'Internal server error', 500, false, { error: err.message })
@@ -62,7 +63,7 @@ module.exports = {
         const pass = bcrypt.compareSync(password, user.password)
         if (pass) {
           const token = jwt.sign({ id: user.id, role_id: user.role_id }, 'KODERAHASIA')
-          return response(res, 'Login Successfully', 200, true, { token })
+          return response(res, 'Login Successfully', 200, true, { id: data.id, token: token })
         } else {
           return response(res, 'Wrong password', 400, false)
         }
