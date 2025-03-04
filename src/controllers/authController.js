@@ -4,18 +4,19 @@ const joi = require('joi')
 const bcrypt = require('bcryptjs')
 const {
   createEmployee,
-  getEmployeeByEmail
+  getEmployeeByUsername
 } = require('../models/employeeModel')
 
 module.exports = {
   createUser: async (req, res) => {
     try {
+      console.log(req.body)
       const schema = joi.object({
-        username: joi.string().required,
+        username: joi.string().required(),
         name: joi.string().required(),
         email: joi.string().required(),
         password: joi.string().required(),
-        role: joi.string('Admin' | 'Employee').required()
+        role: joi.string().valid('Admin','Employee').required()
       })
       let { value: results, error } = schema.validate(req.body)
 
@@ -24,7 +25,7 @@ module.exports = {
       }
 
       const { email, password } = results
-      const isExists = await getEmployeeByEmail({ email })
+      const isExists = await getEmployeeByEmail(email)
       if (isExists.length > 0) {
         return response(res, 'Email already used', 401, false)
       } else {
@@ -37,8 +38,8 @@ module.exports = {
           password: hashedPassword,
           role: results.role
         }
-          const createEmployee = await createEmployee(userCostumer)
-          return response(res, 'Congratulation! Now you have an account!', 200, true, { id: createEmployee.id })
+          const data = await createEmployee(userCostumer)
+          return response(res, 'Congratulation! Now you have an account!', 200, true, { id: data.id })
       }
     } catch (err) {
       return response(res, 'Internal server error', 500, false, { error: err.message })
@@ -47,6 +48,7 @@ module.exports = {
 
   loginUser: async (req, res) => {
     try {
+      console.log(req.body)
       const schema = joi.object({
         username: joi.string().required(),
         password: joi.string().required()
@@ -56,8 +58,8 @@ module.exports = {
         return response(res, 'Login Failed', 401, false)
       }
 
-      const { email, password } = value
-      const data = await getEmployeeByEmail({ email })
+      const { username, password } = value
+      const data = await getEmployeeByUsername(username)
       if (data.length === 1) {
         const user = data[0]
         const pass = bcrypt.compareSync(password, user.password)

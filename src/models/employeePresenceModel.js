@@ -7,12 +7,27 @@ module.exports = {
   },
   createEmployeeTodayPresence: (data = {}) => {
     const query = `INSERT INTO employee_presences (employee_id, clock_in, clock_in_image, clock_out, clock_out_image, created_at)
-        VALUES (?)`
-    return model(query, data)
+        VALUES (?, ?, ?, ?, ?, ?)`;
+    
+    const values = [
+        data.employee_id, 
+        data.clock_in, 
+        data.clock_in_image, 
+        data.clock_out, 
+        data.clock_out_image, 
+        data.created_at
+    ];
+    return model(query, values)
   },
   updateEmployeeTodayPresence: (id, data = {}) => {
-    const query = `UPDATE employee_presences SET ? WHERE id = ${id}`
-    return model(query, data)
+    const fields = Object.keys(data).map(field => `${field} = ?`).join(", ");
+    const values = Object.values(data);
+
+    const query = `UPDATE employee_presences SET ${fields} WHERE id = ?`;
+
+    // Add id as the last parameter
+    values.push(id);
+    return model(query, values)
   },
   listEmployeePresence: (page, limit, custom_date) => {
     let query = `SELECT e.id as employee_id, e.name as name, e.role as role, ep.clock_in as clock_in, ep.clock_in_image as clock_in_image, ep.clock_out as clock_out, ep.clock_out_image as clock_out_image, ep.created_at as created_at

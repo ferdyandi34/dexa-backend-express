@@ -74,11 +74,11 @@ module.exports = {
           id: element.employee_id,
           name: element.name,
           role: element.role,
-          clock_in: element.clock_in,
-          clock_in_image: element.clock_in_image,
-          clock_out: element.clock_out,
-          clock_out_image: element.clock_out_image,
-          created_at: element.created_at
+          clock_in: element.clock_in ?? '',
+          clock_in_image: element.clock_in_image ?? '',
+          clock_out: element.clock_out ?? '',
+          clock_out_image: element.clock_out_image ?? '',
+          created_at: element.created_at ?? ''
         };
         data.push(arr)
       }
