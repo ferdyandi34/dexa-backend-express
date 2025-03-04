@@ -31,8 +31,8 @@ module.exports = {
   },
   listEmployeePresence: (page, limit, custom_date) => {
     let query = `SELECT e.id as employee_id, e.name as name, e.role as role, ep.clock_in as clock_in, ep.clock_in_image as clock_in_image, ep.clock_out as clock_out, ep.clock_out_image as clock_out_image, ep.created_at as created_at
-      FROM employee_presences ep
-      LEFT JOIN employees e ON e.id = ep.employee_id
+      FROM employees e
+      LEFT JOIN employee_presences ep ON e.id = ep.employee_id
       WHERE role = 'Employee' `
     if(custom_date){
       query += `ep.created_at = DATE_FORMAT(${custom_date,'%d-%m-%Y'}) `

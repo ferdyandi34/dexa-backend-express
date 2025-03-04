@@ -4,13 +4,13 @@ const joi = require('joi')
 const bcrypt = require('bcryptjs')
 const {
   createEmployee,
+  getEmployeeByEmail,
   getEmployeeByUsername
 } = require('../models/employeeModel')
 
 module.exports = {
   createUser: async (req, res) => {
     try {
-      console.log(req.body)
       const schema = joi.object({
         username: joi.string().required(),
         name: joi.string().required(),
@@ -48,7 +48,6 @@ module.exports = {
 
   loginUser: async (req, res) => {
     try {
-      console.log(req.body)
       const schema = joi.object({
         username: joi.string().required(),
         password: joi.string().required()

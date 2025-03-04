@@ -12,8 +12,8 @@ module.exports = {
   presenceEmployee: async (req, res) => {
     try {
       const schema = joi.object({
-        employee_id: joi.number().required,
-        image: joi.string().required
+        employee_id: joi.number().required(),
+        image: joi.string().required()
       })
       let { value: results, error } = schema.validate(req.body)
 
@@ -52,9 +52,9 @@ module.exports = {
   listEmployee: async (req, res) => {
     try {
       const schema = joi.object({
-        role: joi.string().required == 'Admin',
-        page: joi.number(1).required,
-        limit: joi.number(10).required,
+        role: joi.string().valid('Admin').required(),
+        page: joi.number().required(),
+        limit: joi.number().max(100).required(),
         date: joi.string()
       })
       let { value: results, error } = schema.validate(req.body)
